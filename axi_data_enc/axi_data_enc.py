@@ -23,9 +23,14 @@ import pdb
 def encode_axi_sub(options,df_in):
 	start_ind_vec = df_in['start_addr'].tolist()
 	var_name_vec = df_in['var_name'].tolist()
+	val_range_vec = df_in['val_range'].tolist()
+	desc_vec = df_in['desc'].tolist()
 	ip_var_name = df_in['ip_var_name'][0]
 	op_var_name = df_in['op_var_name'][0]
 	for i in range(options.prev_index,options.index):
+		description = str(desc_vec[i])
+		value_range = str(val_range_vec[i])
+		print("// "+description.strip()+', '+value_range.strip())
 		print(op_var_name+'.range('+str(start_ind_vec[i+1]-1-options.cur_mesg*options.axi_w)+','+str(start_ind_vec[i]-options.cur_mesg*options.axi_w)+')'+' = '+ip_var_name+'.'+var_name_vec[i])
 
 	return 0
@@ -41,7 +46,7 @@ def encode_axi(options,df_in):
 			encode_axi_sub(options,df_in)
 			options.prev_index = options.index;
 			cur_mesg = cur_mesg+1
-			print()
+			print
 	print("Total Number of AXI Messages = "+str(cur_mesg))
 	return 0;
 
@@ -64,7 +69,7 @@ def main():
 	df_out = pd.DataFrame()
 	# pdb.set_trace()
 	encode_axi(options,df_in)
-	pdb.set_trace()
+	# pdb.set_trace()
 	print(options)
 
 if __name__== "__main__":
