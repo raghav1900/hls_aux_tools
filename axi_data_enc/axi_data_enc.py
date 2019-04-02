@@ -31,7 +31,10 @@ def encode_axi_sub(options,df_in):
 		description = str(desc_vec[i])
 		value_range = str(val_range_vec[i])
 		print("// "+description.strip()+', '+value_range.strip())
-		print(op_var_name+'.range('+str(start_ind_vec[i+1]-1-options.cur_mesg*options.axi_w)+','+str(start_ind_vec[i]-options.cur_mesg*options.axi_w)+')'+' = '+ip_var_name+'.'+var_name_vec[i])
+		if(options.mode==0):
+			print(op_var_name+'.range('+str(start_ind_vec[i+1]-1-options.cur_mesg*options.axi_w)+','+str(start_ind_vec[i]-options.cur_mesg*options.axi_w)+')'+' = '+ip_var_name+'.'+var_name_vec[i])
+		else:
+			print(ip_var_name+'.'+var_name_vec[i]+' = '+op_var_name+'.range('+str(start_ind_vec[i+1]-1-options.cur_mesg*options.axi_w)+','+str(start_ind_vec[i]-options.cur_mesg*options.axi_w)+')')
 
 	return 0
 
