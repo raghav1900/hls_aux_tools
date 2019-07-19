@@ -91,6 +91,86 @@ def encode_axi_2(options,df_in):
 	print("Total Number of AXI Messages = "+str(cur_mesg))
 	return 0;
 
+def encode_axi_3(options,df_in):
+	
+	size_vec = df_in['Size'].tolist();
+	df_in['start_addr'] = df_in['Size'].cumsum()
+	start_ind_vec = df_in['start_addr'].tolist()
+	start_ind_vec.insert(0,0)
+	options.prev_index = 0;
+	options.offset = 0;
+	cur_mesg = 1
+	options.cur_mesg = cur_mesg - 1;
+	total_offset =0 ;
+
+
+	# Names
+	var_name_vec = df_in['Parameter'].tolist()
+	# val_range_vec = df_in['val_range'].tolist()
+	desc_vec = df_in['Description'].tolist()
+	val_vec = df_in['valid'].tolist()
+	ip_var_vec = df_in['struct_name']
+	op_var_vec = df_in['op_var_name']
+
+	print('//#BEGIN#')
+
+	index = 0;
+	while index < len(start_ind_vec):
+
+		# if(val_vec[index]!=1):
+		# 	index = index + 1;
+		# 	continue
+
+		if(size_vec[index] + start_ind_vec[index] + total_offset > options.axi_w):
+			#somethig
+
+			# pdb.set_trace();
+
+			options.offset =  options.offset + (options.axi_w - start_ind_vec[index] - total_offset);
+
+				
+
+			cur_mesg = cur_mesg + 1;
+			options.cur_mesg = cur_mesg - 1;
+
+			total_offset = options.offset - options.cur_mesg*options.axi_w;
+
+			# options.offset = 0;
+
+			print('//#END#')
+			print()
+			print('//#BEGIN#')
+		else:
+			description = str(desc_vec[index])
+			print("// "+description.strip())
+			
+			if(options.mode==0):
+				if(val_vec[index]==1):
+					print(op_var_vec[index]+'.range('+str(int(start_ind_vec[index+1]-1 + total_offset))+','+str(int(start_ind_vec[index]+ total_offset))+')'+' = '+ip_var_vec[index]+'.'+var_name_vec[index]+';')
+				else:
+					print(op_var_vec[index]+'.range('+str(int(start_ind_vec[index+1]-1 + total_offset))+','+str(int(start_ind_vec[index]+ total_offset))+')'+' = 0;')
+			elif(options.mode==1):
+				if(val_vec[index]==1):
+					print(ip_var_vec[index]+'.'+var_name_vec[index]+' = '+op_var_vec[index]+'.range('+str(int(start_ind_vec[index+1]-1+ total_offset))+','+str(int(start_ind_vec[index]+ total_offset))+')'+';')
+				else:
+					print('//'+str(ip_var_vec[index])+'.'+str(var_name_vec[index])+' = '+op_var_vec[index]+'.range('+str(int(start_ind_vec[index+1]-1+ total_offset))+','+str(int(start_ind_vec[index]+ total_offset))+')'+';')
+			elif(options.mode==2):
+				if(val_vec[index]==1):
+					print(ip_var_vec[index]+'.'+var_name_vec[index]+' = '+op_var_vec[index]+';')
+				else:
+					print('//'+ip_var_vec[index]+'.'+var_name_vec[index]+' = '+op_var_vec[index]+';')
+
+			if(start_ind_vec[index+1] + total_offset == 64):
+				cur_mesg = cur_mesg + 1;
+				options.cur_mesg = cur_mesg - 1;
+				total_offset = total_offset - options.axi_w;
+				print('//#END#')
+				print()
+				print('//#BEGIN#')
+
+			index = index +1;
+
+
 def struct_encode(options,df_in):
 	# Function that creates structures from excel sheets
 	struct_name_vec = df_in['struct_name'].tolist()
@@ -149,7 +229,7 @@ def main():
 	if(options.mode == 3):
 		struct_encode(options,df_in);
 	else:
-		encode_axi_2(options,df_in)
+		encode_axi_3(options,df_in)
 	# pdb.set_trace()
 	print('/*')
 	print(options)
